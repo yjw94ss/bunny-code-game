@@ -34,7 +34,6 @@
     overflow-x:hidden;
     display:flex;
     flex-direction:column;
-    justify-content:center;
   }
   /* 背景装饰 */
   .bg-deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
@@ -51,7 +50,7 @@
   .cloud.c3::after{width:44px;height:44px;left:70px;top:-16px}
   @keyframes drift{from{transform:translateX(0)}to{transform:translateX(calc(100vw + 320px))}}
 
-  .app{position:relative;z-index:1;width:100%;max-width:1240px;margin:0 auto;padding:16px 18px 24px}
+  .app{position:relative;z-index:1;width:100%;max-width:1240px;margin:auto;padding:16px 18px 24px}
 
   /* 顶栏 */
   .topbar{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
@@ -93,11 +92,27 @@
   .carrot{transition:transform .15s}
   .carrot.eaten{animation:eat .4s ease forwards}
   @keyframes eat{0%{transform:scale(1)}45%{transform:scale(1.28)}100%{transform:scale(0);opacity:0}}
+
+  /* 水波 / 传送门 / 钥匙 */
+  .waveA{animation:waveMove 3.6s linear infinite}
+  @keyframes waveMove{from{transform:translateX(0)}to{transform:translateX(18px)}}
+  .spin{animation:spin 9s linear infinite;transform-box:fill-box;transform-origin:50% 50%}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .portal-wrap{transition:opacity .2s}
+  .portal-wrap.flash{animation:pflash .5s ease}
+  @keyframes pflash{0%,100%{opacity:1}45%{opacity:.3}}
+  .key{animation:keyBob 2s ease-in-out infinite}
+  @keyframes keyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .key-wrap.taken{opacity:0;transition:opacity .35s}
+  .key-wrap.taken .key{animation:none;transform:translateY(-24px) scale(.5);transition:transform .35s}
   .stage-foot{display:flex;align-items:center;gap:12px;padding:2px 4px 0}
   .cnt{display:inline-flex;align-items:center;gap:6px;background:#fff4e2;border-radius:12px;padding:6px 12px;font-weight:800;font-size:14px;color:#a9601a}
   .cnt svg{width:17px;height:17px}
   .cnt b{font-size:16px}
   .cnt.all{background:#e6f9ec;color:#218739}
+  .cnt.key{background:#fff8dd;color:#a98200}
+  .cnt.key.got{background:#e6f9ec;color:#218739}
+  .cnt.key.got svg circle,.cnt.key.got svg path{stroke:#218739}
   .foot-note{margin-left:auto;font-size:13px;color:#9aabb9;font-weight:600}
 
   /* 抖动 / 撞墙 */
@@ -146,7 +161,30 @@
   .blk.turn{background:linear-gradient(160deg,#ffc55c,var(--orange))}
   .blk.jump{background:linear-gradient(160deg,#b39bff,var(--purple))}
   .blk.active{outline:4px solid #ffd166;outline-offset:2px;transform:translateY(-3px) scale(1.06)}
-  @keyframes pop-in{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes pop-in{from{transform:scale(.86);opacity:.55}to{transform:scale(1);opacity:1}}
+
+  /* 重复框 */
+  .repbox{
+    flex:1 1 100%;width:100%;border:3px dashed #c8b6ff;border-radius:18px;background:#faf7ff;
+    padding:7px 8px 8px;display:flex;flex-direction:column;gap:6px;
+    transition:box-shadow .2s,border-color .2s,background .2s;
+  }
+  .repbox.open{border-style:solid;border-color:#8b5cf6;box-shadow:0 0 0 4px rgba(139,92,246,.13);background:#f6f1ff}
+  .repbox.active{box-shadow:0 0 0 4px rgba(255,209,102,.95);border-color:#f0b93f}
+  .rephead{display:flex;align-items:center;gap:6px}
+  .rephead .x2{
+    background:linear-gradient(160deg,#b39bff,#8b5cf6);color:#fff;font-weight:800;font-size:12px;
+    padding:3px 9px;border-radius:9px;box-shadow:0 2px 0 #6d3fd6;letter-spacing:.5px;
+  }
+  .repbtn{
+    border:none;cursor:pointer;font-family:inherit;font-weight:800;font-size:12px;
+    padding:4px 9px;border-radius:9px;background:#fff;color:#7c5cd6;box-shadow:0 2px 0 #e2d8fb;
+  }
+  .repbtn:active{transform:translateY(2px);box-shadow:none}
+  .repbtn.del{margin-left:auto;color:#c2637f;box-shadow:0 2px 0 #f6dde4;width:26px;height:24px;padding:0}
+  .repbtn.ok{background:#8b5cf6;color:#fff;box-shadow:0 2px 0 #6d3fd6}
+  .repbody{display:flex;flex-wrap:wrap;gap:8px;min-height:50px;align-items:flex-start}
+  .repempty{font-size:12px;color:#b3a6d4;font-weight:700;padding:14px 6px}
 
   .palette{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
   .pbtn{
@@ -161,6 +199,7 @@
   .pbtn.move{background:linear-gradient(160deg,#66b3ff,var(--blue))}
   .pbtn.turn{background:linear-gradient(160deg,#ffc55c,var(--orange))}
   .pbtn.jump{background:linear-gradient(160deg,#b39bff,var(--purple))}
+  .pbtn.rep{background:linear-gradient(160deg,#d8a8ff,#a855f7)}
   .pbtn:disabled{filter:grayscale(.7) opacity(.5);cursor:not-allowed;transform:none}
 
   .actions{display:grid;grid-template-columns:1.6fr .9fr .9fr;gap:9px;margin-top:auto;padding-top:4px}
@@ -273,6 +312,10 @@
           <svg viewBox="0 0 24 24" fill="none"><path d="M12 21c-1.6 0-2.8-1-2.8-2.2 0-.6.2-1.1.5-1.7L12 13l2.3 4.1c.3.6.5 1.1.5 1.7 0 1.2-1.2 2.2-2.8 2.2Z" fill="#ff8a3d"/><path d="M12 13V4" stroke="#ff8a3d" stroke-width="2" stroke-linecap="round"/><path d="M12 6c1.6 0 3-1 3-2.4C15 2.2 13.4 2 12 3c-1.4-1-3-.8-3 .6C9 5 10.4 6 12 6Z" fill="#4fc93a"/></svg>
           <b id="cntNum">0</b><span>/</span><span id="cntAll">1</span>
         </div>
+        <div class="cnt key" id="keyChip" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="4.2" stroke="#c99100" stroke-width="2.4"/><path d="M11 11l7 7M15 15l2-2M18 18l2-2" stroke="#c99100" stroke-width="2.4" stroke-linecap="round"/></svg>
+          <span id="keyTxt">钥匙</span>
+        </div>
         <div class="cnt" id="blockCnt" style="background:#eef6ff;color:#3d7ec0">
           <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2.6" fill="#3b82f6"/><rect x="13" y="3" width="8" height="8" rx="2.6" fill="#8b5cf6"/><rect x="3" y="13" width="8" height="8" rx="2.6" fill="#f59e0b"/><rect x="13" y="13" width="8" height="8" rx="2.6" fill="#37b24d"/></svg>
           <b id="blkNum">0</b><span>/</span><span id="blkAll">10</span>
@@ -344,6 +387,8 @@ const SFX = {
   jump(){ tone(520,.12,'sine',.1,0,900); },
   collect(){ tone(880,.09,'sine',.12); tone(1320,.1,'sine',.1,.09); tone(1760,.12,'sine',.07,.18); },
   bump(){ tone(160,.16,'sawtooth',.09,0,90); },
+  unlock(){ tone(700,.09,'square',.07); tone(1050,.1,'square',.06,.08); tone(1500,.16,'sine',.09,.16); },
+  portal(){ tone(300,.3,'sine',.08,0,1100); tone(1200,.24,'triangle',.06,.06,320); },
   fail(){ tone(300,.14,'sawtooth',.07,0,200); tone(200,.2,'sawtooth',.06,.12,120); },
   win(){ [523,659,784,1046].forEach((f,i)=>tone(f,.18,'sine',.11,i*.11)); [523,784].forEach((f,i)=>tone(f,.5,'triangle',.05,.46+i*.02)); },
   tap(){ tone(760,.05,'square',.05); }
@@ -365,14 +410,30 @@ const LEVELS = [
     map:['......','.###..','..C...','S.C.H.'] },
   { name:'学会跳跳', tip:'紫色按钮可以一次跳两格！', dir:'right', best:2, jump:true,
     map:['.....','S#C.H','.....'] },
-  { name:'跳过石头', tip:'跳过石头，别踩到萝卜上面去', dir:'right', best:8, jump:true,
+  { name:'水塘挡路', tip:'水塘不能走，跳过去！', dir:'right', best:3, jump:true,
+    map:['######','S.~C~H','######'] },
+  { name:'跳过石头', tip:'跳过石头，别漏掉萝卜', dir:'right', best:8, jump:true,
     map:['......','S..#.H','...#..','....C.'] },
-  { name:'绕来绕去', tip:'先想好顺序，再一块一块加', dir:'right', best:10, jump:true,
-    map:['......','S.#..H','..#...','C.#...','....C.'] },
+  { name:'水塘迷宫', tip:'水很宽，走不过去，只能跳', dir:'right', best:8, jump:true,
+    map:['.#~...','S.~...','..~.C.','.#~...','..~..H'] },
+  { name:'钥匙与门', tip:'先捡钥匙，门才会打开', dir:'right', best:10, jump:true,
+    map:['..####','S..D.H','.K####','.C####'] },
+  { name:'钥匙在水那边', tip:'钥匙在水塘后面，门在另一头', dir:'right', best:4, jump:true,
+    map:['#######','S.~KD.H','#######'] },
+  { name:'传送门', tip:'踩上紫色圈圈，会从另一个圈圈出来', dir:'right', best:4, jump:true,
+    map:['S..1..','######','######','#2CH.#'] },
+  { name:'传送门迷宫', tip:'小房间没有门，只能靠传送门', dir:'right', best:10, jump:true,
+    map:['S.....#','..1...#','#######','#######','#C...2#','#..H..#'] },
   { name:'小迷宫', tip:'迷路了就慢慢来，别着急', dir:'right', best:8, jump:true,
     map:['......','S.#...','..#.#.','C...C.','....#H'] },
+  { name:'绕来绕去', tip:'先想好顺序，再一块一块加', dir:'right', best:10, jump:true,
+    map:['......','S.#..H','..#...','C.#...','....C.'] },
   { name:'三颗萝卜', tip:'三颗全吃掉，一颗都不能少', dir:'up', best:15, jump:true,
     map:['..#..C','.C#...','..#.#.','S...#H','.C....'] },
+  { name:'重复积木', tip:'把积木放进紫色框里，它就会做两遍', dir:'right', best:5, repeat:true, max:6,
+    map:['.........','S..C..C.H','.........'] },
+  { name:'重复转弯', tip:'走到底转个弯，再用重复走一遍', dir:'right', best:7, repeat:true, max:9,
+    map:['S..C..','......','......','.....C','......','.....H'] },
   { name:'终极挑战', tip:'最后一关，你一定可以！', dir:'right', best:17, jump:true,
     map:['S.C.#..','.##.#..','....#.C','.#.....','.#.##..','C....#H'] }
 ];
@@ -384,9 +445,10 @@ const holder = $('#holder');
 let lvIndex = 0, level = null, grid = [], rows = 0, cols = 0;
 let start = {r:0,c:0}, home = {r:0,c:0}, totalCarrots = 0, collected = 0;
 let bunny = {r:0,c:0,d:1};
-let program = [];
+let hasKey = false, portals = {}, portalEls = {}, doorEl = null, keyEl = null;
+let program = [];        // {t:'c', c:'M'} 或 {t:'r', body:[...]}
+let openRep = null;      // 正在编辑的重复框
 let running = false, runToken = 0;
-let carrotEls = new Map();
 let bunnyPos = null, bunnyRot = null;
 let progress = { unlocked:0, stars:{} };
 
@@ -406,6 +468,7 @@ function saveProgress(){
 function icon(kind){
   const s = 'stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"';
   if(kind === 'move') return `<svg viewBox="0 0 24 24" ${s}><path d="M12 20V5"/><path d="M5.5 11.5 12 5l6.5 6.5"/></svg>`;
+  if(kind === 'repeat') return `<svg viewBox="0 0 24 24" ${s}><path d="M3.5 10a5 5 0 0 1 5-5h9"/><path d="M14.5 1.8 17.8 5l-3.3 3.2"/><path d="M20.5 14a5 5 0 0 1-5 5h-9"/><path d="M9.5 22.2 6.2 19l3.3-3.2"/></svg>`;
   if(kind === 'jump') return `<svg viewBox="0 0 24 24" ${s}><path d="M6.4 11.6 12 5.8l5.6 5.8"/><path d="M6.4 19 12 13.2 17.6 19"/></svg>`;
   if(kind === 'left') return `<svg viewBox="0 0 24 24" ${s}><path d="M17.5 21v-9a4.5 4.5 0 0 0-4.5-4.5H4.5"/><path d="M9 3 4 7.5 9 12"/></svg>`;
   return `<svg viewBox="0 0 24 24" ${s}><path d="M6.5 21v-9A4.5 4.5 0 0 1 11 7.5h8.5"/><path d="M15 3l5 4.5L15 12"/></svg>`;
@@ -475,14 +538,69 @@ function houseSVG(open){
   </g>`;
 }
 
+function waterSVG(){
+  return `<g class="water">
+    <rect x="-46" y="-46" width="92" height="92" rx="18" fill="#48bdf4"/>
+    <rect x="-46" y="-46" width="92" height="92" rx="18" fill="#8bdbff" opacity=".35"/>
+    <g clip-path="url(#waterClip)">
+      <g class="waveA"><path d="M-54 -14q9-7 18 0t18 0 18 0 18 0 18 0 18 0" stroke="#d6f2ff" stroke-width="3.2" fill="none" opacity=".85"/></g>
+      <g class="waveA" style="animation-duration:4.8s;animation-direction:reverse"><path d="M-54 10q9-7 18 0t18 0 18 0 18 0 18 0 18 0" stroke="#b9ecff" stroke-width="2.6" fill="none" opacity=".7"/></g>
+      <g class="waveA" style="animation-duration:6s"><path d="M-54 30q9-6 18 0t18 0 18 0 18 0 18 0 18 0" stroke="#d6f2ff" stroke-width="2.4" fill="none" opacity=".55"/></g>
+    </g>
+  </g>`;
+}
+function keySVG(){
+  return `<g class="key">
+    <ellipse cx="0" cy="27" rx="17" ry="5.5" fill="#2a5d33" opacity=".2"/>
+    <circle cx="0" cy="-9" r="11" fill="none" stroke="#f2b90f" stroke-width="7"/>
+    <circle cx="0" cy="-9" r="11" fill="none" stroke="#ffe27a" stroke-width="2" opacity=".9"/>
+    <path d="M0 2v23" stroke="#f2b90f" stroke-width="7" stroke-linecap="round"/>
+    <path d="M0 13h10M0 20h9" stroke="#f2b90f" stroke-width="6" stroke-linecap="round"/>
+  </g>`;
+}
+function doorSVG(open){
+  const post = `<rect x="-32" y="-38" width="13" height="74" rx="5" fill="#9dabba"/>
+    <rect x="19" y="-38" width="13" height="74" rx="5" fill="#9dabba"/>
+    <rect x="-32" y="-38" width="13" height="74" rx="5" fill="#fff" opacity=".2"/>
+    <rect x="19" y="-38" width="13" height="74" rx="5" fill="#fff" opacity=".2"/>`;
+  if(open){
+    return `<g class="door">
+      <ellipse cx="0" cy="34" rx="30" ry="8" fill="#2a5d33" opacity=".18"/>
+      ${post}
+      <rect x="-19" y="-32" width="38" height="68" rx="6" fill="#dff7ea"/>
+      <rect x="-19" y="-32" width="38" height="68" rx="6" fill="url(#openGlow)"/>
+      <path d="M-8 2l6 9 14-17" stroke="#37b24d" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>`;
+  }
+  return `<g class="door">
+    <ellipse cx="0" cy="34" rx="30" ry="8" fill="#2a5d33" opacity=".18"/>
+    ${post}
+    <rect x="-19" y="-32" width="38" height="68" rx="4" fill="#b3803f"/>
+    <path d="M-8-32v68M3-32v68" stroke="#8c5f2a" stroke-width="3"/>
+    <rect x="-19" y="-16" width="38" height="7" rx="3" fill="#8c5f2a"/>
+    <rect x="-19" y="10" width="38" height="7" rx="3" fill="#8c5f2a"/>
+    <circle cx="0" cy="0" r="11.5" fill="#f2b90f"/>
+    <circle cx="0" cy="0" r="11.5" fill="none" stroke="#ffe27a" stroke-width="2.4"/>
+    <circle cx="0" cy="-2.5" r="3.2" fill="#8c5f2a"/>
+    <path d="M0 0v6" stroke="#8c5f2a" stroke-width="3.2" stroke-linecap="round"/>
+  </g>`;
+}
+function portalSVG(){
+  return `<g class="portal">
+    <circle r="40" fill="#8b5cf6" opacity=".16"/>
+    <circle r="31" fill="#e9e0ff" opacity=".95"/>
+    <circle r="31" fill="none" stroke="#7c3aed" stroke-width="6"/>
+    <g class="spin"><circle r="31" fill="none" stroke="#b79aff" stroke-width="4" stroke-dasharray="9 13"/></g>
+    <circle r="30" fill="url(#portalGlow)"/>
+  </g>`;
+}
+
 function buildBoard(){
   const W = cols * CELL, H = rows * CELL;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  const ar = W / H;
   holder.style.aspectRatio = `${W} / ${H}`;
   fitBoard();
-  let s = '';
-  s += `<rect x="0" y="0" width="${W}" height="${H}" rx="26" fill="#7fc44a"/>`;
+  let s = `<rect x="0" y="0" width="${W}" height="${H}" rx="26" fill="#7fc44a"/>`;
   // 草地纹理
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
@@ -503,34 +621,51 @@ function buildBoard(){
       }
     }
   }
-  s = `<defs>
-      <linearGradient id="tileShine" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#ffffff" stop-opacity=".35"/>
-        <stop offset=".55" stop-color="#ffffff" stop-opacity="0"/>
-      </linearGradient>
-    </defs>` + s;
 
-  carrotEls = new Map();
+  portalEls = {};
   for(let r=0;r<rows;r++){
     for(let c=0;c<cols;c++){
       const ch = grid[r][c];
       const cx = c*CELL + CELL/2, cy = r*CELL + CELL/2;
-      if(ch === '#') s += `<g transform="translate(${cx},${cy})">${rockSVG()}</g>`;
+      if(ch === '#') {
+        const seed = (r*13 + c*7) % 7;
+        const rot = ((seed % 5) - 2) * 7;
+        const sc = 0.92 + (seed % 3) * 0.05;
+        s += `<g transform="translate(${cx},${cy}) rotate(${rot}) scale(${sc})">${rockSVG()}</g>`;
+      }
+      else if(ch === '~') s += `<g transform="translate(${cx},${cy})">${waterSVG()}</g>`;
       else if(ch === 'H') s += `<g class="house-wrap" transform="translate(${cx},${cy - 4})">${houseSVG(collected === totalCarrots)}</g>`;
       else if(ch === 'C') s += `<g class="carrot-wrap" transform="translate(${cx},${cy - 6})">${carrotSVG()}</g>`;
+      else if(ch === 'K') s += `<g class="key-wrap" transform="translate(${cx},${cy - 4})">${keySVG()}</g>`;
+      else if(ch === 'D') s += `<g class="door-wrap" transform="translate(${cx},${cy - 2})">${doorSVG(hasKey)}</g>`;
+      else if(ch === '1' || ch === '2') s += `<g class="portal-wrap" transform="translate(${cx},${cy})">${portalSVG()}</g>`;
     }
   }
   s += `<g id="bunnyWrap">${makeBunny()}</g>`;
-  svg.innerHTML = s;
+
+  const defs = `<defs>
+      <linearGradient id="tileShine" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".35"/>
+        <stop offset=".55" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="doorWood" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".3"/>
+        <stop offset="1" stop-color="#8a6039" stop-opacity=".35"/>
+      </linearGradient>
+      <radialGradient id="openGlow"><stop offset="0" stop-color="#7ce8a4" stop-opacity=".55"/><stop offset="1" stop-color="#7ce8a4" stop-opacity="0"/></radialGradient>
+      <radialGradient id="portalGlow"><stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".65" stop-color="#c9b6ff" stop-opacity=".55"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
+      <clipPath id="waterClip"><rect x="-46" y="-46" width="92" height="92" rx="18"/></clipPath>
+    </defs>`;
+  svg.innerHTML = defs + s;
   bunnyPos = svg.querySelector('#bunnyPos');
   bunnyRot = svg.querySelector('#bunnyRot');
   placeBunny(false);
 }
 
 function fitBoard(){
-  const ar = (cols * CELL) / (rows * CELL);
-  const maxH = Math.min(window.innerHeight * 0.56, 560);
+  const ar = cols / rows;
   const availW = Math.max(240, holder.parentElement.clientWidth - 36);
+  const maxH = Math.max(260, Math.min(window.innerHeight - 260, 660));
   const w = Math.min(availW, maxH * ar);
   holder.style.width = w + 'px';
 }
@@ -561,27 +696,48 @@ function placeBunny(animate, dur){
 
 /* ============ 交互 ============ */
 function walkable(r,c){
-  return r >= 0 && c >= 0 && r < rows && c < cols && grid[r][c] !== '#';
+  if(r < 0 || c < 0 || r >= rows || c >= cols) return false;
+  const ch = grid[r][c];
+  if(ch === '#' || ch === '~') return false;          // 石头、水塘都走不进去
+  if(ch === 'D' && !hasKey) return false;             // 没钥匙，门锁着
+  return true;
+}
+function jumpPath(r,c,d){
+  // 跳两格：中间那格可以是石头/水，但关着的门跳不过去
+  const [dr,dc] = DIRS[d];
+  const mr = r + dr, mc = c + dc;
+  if(mr >= 0 && mc >= 0 && mr < rows && mc < cols && grid[mr][mc] === 'D' && !hasKey) return false;
+  return walkable(r + dr*2, c + dc*2);
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 function currentMax(){ return level.max || Math.max(level.best + 6, 8); }
 
+/* ---- 程序模型：{t:'c',c:'M'} | {t:'r',body:[]} ---- */
+function countBlocks(list){
+  return list.reduce((n,it)=> n + 1 + (it.t === 'r' ? countBlocks(it.body) : 0), 0);
+}
+
 function setLevel(i){
   lvIndex = Math.max(0, Math.min(LEVELS.length-1, i));
   const raw = LEVELS[lvIndex];
   level = Object.assign({}, raw);
-  level.max = Math.max(level.best + 6, 8);
+  if(!level.max) level.max = Math.max(level.best + 6, 8);
   grid = raw.map.map(row => row.split(''));
   rows = grid.length; cols = grid[0].length;
-  totalCarrots = 0; collected = 0;
+  totalCarrots = 0; collected = 0; hasKey = false; portals = {};
+  let hasKeyTile = false;
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
-    if(grid[r][c] === 'C') totalCarrots++;
-    if(grid[r][c] === 'S') start = {r,c};
-    if(grid[r][c] === 'H') home = {r,c};
+    const ch = grid[r][c];
+    if(ch === 'C') totalCarrots++;
+    if(ch === 'S') start = {r,c};
+    if(ch === 'H') home = {r,c};
+    if(ch === 'K') hasKeyTile = true;
+    if(ch === '1' || ch === '2') portals[ch] = {r,c};
   }
+  level.hasKeyTile = hasKeyTile;
   bunny = {r:start.r, c:start.c, d:DIRNAME[raw.dir]};
-  program = [];
+  program = []; openRep = null;
   running = false; runToken++;
   $('#lvBadge').textContent = `第 ${lvIndex+1} 关`;
   $('#lvTip').textContent = raw.tip;
@@ -590,6 +746,8 @@ function setLevel(i){
   $('#cnt').classList.remove('all');
   $('#blkAll').textContent = level.max;
   $('#blkNum').textContent = 0;
+  $('#keyChip').style.display = hasKeyTile ? '' : 'none';
+  $('#keyChip').classList.remove('got');
   renderDots();
   buildBoard();
   renderProgram();
@@ -616,80 +774,162 @@ function renderDots(){
 }
 
 const KIND = { M:'move', J:'jump', L:'turn', R:'turn' };
-const LABEL = { M:'前进', J:'跳跃', L:'左转', R:'右转' };
+const iconKind = c => c === 'M' ? 'move' : c === 'J' ? 'jump' : c === 'L' ? 'left' : 'right';
 
 function renderPalette(){
   const list = [['M','move','前进'],['L','turn','左转'],['R','turn','右转']];
   if(level.jump) list.push(['J','jump','跳跃']);
+  if(level.repeat) list.push(['REP','rep','重复×2']);
   const p = $('#palette');
   p.style.gridTemplateColumns = `repeat(${list.length},1fr)`;
   p.innerHTML = list.map(([cmd,kind,label])=>
-    `<button class="pbtn ${kind}" data-cmd="${cmd}">${icon(cmd==='M'?'move':cmd==='J'?'jump':cmd==='L'?'left':'right')}<span>${label}</span></button>`
+    `<button class="pbtn ${kind}" data-cmd="${cmd}">${icon(cmd==='REP'?'repeat':iconKind(cmd))}<span>${label}</span></button>`
   ).join('');
   p.querySelectorAll('.pbtn').forEach(b=>{
-    b.addEventListener('click', ()=> addCmd(b.dataset.cmd));
+    b.addEventListener('click', ()=>{
+      if(b.dataset.cmd === 'REP') addRepeat(); else addCmd(b.dataset.cmd);
+    });
   });
 }
 
 function addCmd(cmd){
   if(running) return;
-  if(program.length >= currentMax()){ toast('积木用完啦，删掉一块再加吧'); SFX.bump(); return; }
-  program.push(cmd);
+  if(countBlocks(program) >= currentMax()){ toast('积木用完啦，删掉一块再加吧'); SFX.bump(); return; }
+  const item = {t:'c', c:cmd};
+  if(openRep) openRep.body.push(item); else program.push(item);
   SFX.add();
   renderProgram();
   updateButtons();
-  // 自动滚到底
   const pr = $('#program'); pr.scrollTop = pr.scrollHeight;
+}
+
+function addRepeat(){
+  if(running) return;
+  if(openRep){ toast('先点「✓ 收好」，再开下一个重复'); SFX.bump(); return; }
+  if(countBlocks(program) >= currentMax() - 1){ toast('积木不够啦，删掉一块吧'); SFX.bump(); return; }
+  const g = {t:'r', body:[]};
+  program.push(g);
+  openRep = g;
+  SFX.add();
+  renderProgram();
+  updateButtons();
+}
+
+function findParentArray(list, target){
+  if(list.indexOf(target) >= 0) return list;
+  for(const it of list){
+    if(it.t === 'r'){ const r = findParentArray(it.body, target); if(r) return r; }
+  }
+  return null;
+}
+function removeItem(it){
+  const arr = findParentArray(program, it);
+  if(arr) arr.splice(arr.indexOf(it), 1);
+  if(openRep === it || (openRep && !findParentArray(program, openRep))) openRep = null;
+}
+
+function blockEl(it, path){
+  const b = document.createElement('button');
+  b.className = 'blk ' + KIND[it.c];
+  b.innerHTML = icon(iconKind(it.c));
+  b.addEventListener('click', e=>{
+    e.stopPropagation();
+    if(running) return;
+    removeItem(it);
+    SFX.del();
+    renderProgram();
+    updateButtons();
+  });
+  it._el = b;
+  return b;
+}
+
+function listEl(list, path){
+  const frag = document.createDocumentFragment();
+  list.forEach((it, i)=>{
+    if(it.t === 'r'){
+      const box = document.createElement('div');
+      box.className = 'repbox' + (it === openRep ? ' open' : '');
+      const head = document.createElement('div');
+      head.className = 'rephead';
+      head.innerHTML = `<span class="x2">×2</span>`;
+      if(it === openRep){
+        const ok = document.createElement('button');
+        ok.className = 'repbtn ok';
+        ok.innerHTML = '✓ 收好';
+        ok.addEventListener('click', e=>{
+          e.stopPropagation();
+          openRep = null; SFX.tap(); renderProgram(); updateButtons();
+        });
+        head.appendChild(ok);
+      }
+      const del = document.createElement('button');
+      del.className = 'repbtn del';
+      del.innerHTML = '✕';
+      del.addEventListener('click', e=>{
+        e.stopPropagation();
+        if(running) return;
+        removeItem(it); SFX.del(); renderProgram(); updateButtons();
+      });
+      head.appendChild(del);
+      box.appendChild(head);
+      const body = document.createElement('div');
+      body.className = 'repbody';
+      if(it.body.length === 0){
+        body.innerHTML = `<div class="repempty">把积木放进这里</div>`;
+      }else{
+        body.appendChild(listEl(it.body, path + i + '-'));
+      }
+      box.appendChild(body);
+      box.addEventListener('click', ()=>{
+        if(running) return;
+        openRep = (openRep === it) ? null : it;
+        SFX.tap(); renderProgram(); updateButtons();
+      });
+      it._el = box;
+      frag.appendChild(box);
+    }else{
+      frag.appendChild(blockEl(it, path + i));
+    }
+  });
+  return frag;
 }
 
 function renderProgram(){
   const pr = $('#program');
+  const total = countBlocks(program);
   pr.innerHTML = '';
-  pr.classList.toggle('filled', program.length > 0);
-  if(program.length === 0){
+  pr.classList.toggle('filled', total > 0);
+  if(total === 0){
     pr.innerHTML = `<div class="empty-hint">
       <div class="bob">${icon('move').replace('<svg','<svg style="width:38px;height:38px;color:#b9d3e6"')}</div>
       <div>先点下面的按钮<br>把积木放进这里</div>
     </div>`;
   }else{
-    program.forEach((cmd, i)=>{
-      const b = document.createElement('button');
-      b.className = 'blk ' + KIND[cmd];
-      b.dataset.i = i;
-      b.innerHTML = `<span class="i">${i+1}</span>${icon(cmd==='M'?'move':cmd==='J'?'jump':cmd==='L'?'left':'right')}`;
-      b.addEventListener('click', ()=>{
-        if(running) return;
-        program.splice(i,1);
-        SFX.del();
-        renderProgram();
-        updateButtons();
-      });
-      pr.appendChild(b);
-    });
+    pr.appendChild(listEl(program, ''));
   }
-  $('#blkNum').textContent = program.length;
+  $('#blkNum').textContent = total;
   $('#blkAll').textContent = currentMax();
-  const left = currentMax() - program.length;
-  $('#usedLbl').textContent = `已用 ${program.length} / ${currentMax()}`;
-  // 按钮可用性
-  const full = program.length >= currentMax();
-  document.querySelectorAll('.pbtn').forEach(b=> b.disabled = full || running);
+  $('#usedLbl').textContent = `已用 ${total} / ${currentMax()}`;
 }
 
 function updateButtons(){
+  const total = countBlocks(program);
   const runBtn = $('#runBtn');
-  runBtn.disabled = program.length === 0 || running;
-  runBtn.classList.toggle('pulse', program.length > 0 && !running);
-  $('#undoBtn').disabled = program.length === 0 || running;
-  $('#clearBtn').disabled = program.length === 0 || running;
-  document.querySelectorAll('.pbtn').forEach(b=> b.disabled = running || program.length >= currentMax());
+  runBtn.disabled = total === 0 || running;
+  runBtn.classList.toggle('pulse', total > 0 && !running);
+  $('#undoBtn').disabled = total === 0 || running;
+  $('#clearBtn').disabled = total === 0 || running;
+  const full = total >= currentMax();
+  document.querySelectorAll('.pbtn').forEach(b=>{
+    b.disabled = running || full || (b.dataset.cmd === 'REP' && !!openRep);
+  });
   runBtn.textContent = running ? '跑起来…' : '开始';
 }
 
-function highlight(i){
-  document.querySelectorAll('.blk').forEach((b,bi)=>{
-    b.classList.toggle('active', bi === i);
-  });
+function highlight(it){
+  document.querySelectorAll('.blk.active, .repbox.active').forEach(el=> el.classList.remove('active'));
+  if(it && it._el) it._el.classList.add('active');
 }
 
 /* ============ 运行 ============ */
@@ -716,10 +956,15 @@ async function doCommand(cmd){
   const steps = cmd === 'J' ? 2 : 1;
   const [dr,dc] = DIRS[bunny.d];
   const nr = bunny.r + dr*steps, nc = bunny.c + dc*steps;
-  if(!walkable(nr,nc)){
+  const ok = cmd === 'J' ? jumpPath(bunny.r, bunny.c, bunny.d) : walkable(nr, nc);
+  if(!ok){
     bumpAnim(); SFX.bump();
     await sleep(200); SFX.fail();
-    toast(steps === 2 ? '前面跳不过去哦～' : '前面过不去啦！');
+    const [tr,tc] = [bunny.r + dr, bunny.c + dc];
+    const ahead = (tr>=0&&tc>=0&&tr<rows&&tc<cols) ? grid[tr][tc] : '#';
+    if(ahead === '~') toast('小兔子不会游泳，要跳过去！');
+    else if(ahead === 'D' && !hasKey) toast('门锁着呢，先去找钥匙');
+    else toast(steps === 2 ? '前面跳不过去哦～' : '前面过不去啦！');
     return 'fail';
   }
   if(cmd === 'J') SFX.jump(); else SFX.step();
@@ -727,9 +972,37 @@ async function doCommand(cmd){
   placeBunny(true, cmd === 'J' ? 450 : 330);
   await sleep(cmd === 'J' ? 470 : 340);
 
-  // 吃萝卜
-  if(grid[nr][nc] === 'C'){
+  // 捡钥匙
+  if(grid[nr][nc] === 'K'){
     grid[nr][nc] = '.';
+    hasKey = true;
+    SFX.unlock();
+    const kw = svg.querySelector('.key-wrap');
+    if(kw){ kw.classList.add('taken'); setTimeout(()=> kw.remove(), 380); }
+    const dw = svg.querySelector('.door-wrap');
+    if(dw) dw.innerHTML = doorSVG(true);
+    $('#keyChip').classList.add('got');
+    await sleep(220);
+  }
+
+  // 传送门
+  if(grid[nr][nc] === '1' || grid[nr][nc] === '2'){
+    const other = grid[nr][nc] === '1' ? '2' : '1';
+    const p = portals[other];
+    SFX.portal();
+    await sleep(200);
+    const pw = svg.querySelectorAll('.portal-wrap');
+    pw.forEach(el=> el.classList.add('flash'));
+    bunny.r = p.r; bunny.c = p.c;
+    placeBunny(false);
+    await sleep(260);
+    pw.forEach(el=> el.classList.remove('flash'));
+  }
+
+  // 吃萝卜
+  if(grid[bunny.r][bunny.c] === 'C'){
+    const cr = bunny.r, cc = bunny.c;
+    grid[cr][cc] = '.';
     collected++;
     $('#cntNum').textContent = collected;
     if(collected === totalCarrots){
@@ -737,7 +1010,7 @@ async function doCommand(cmd){
       const hw = svg.querySelector('.house-wrap');
       if(hw) hw.innerHTML = houseSVG(true);
     }
-    const targetX = nc*CELL + CELL/2, targetY = nr*CELL + CELL/2 - 6;
+    const targetX = cc*CELL + CELL/2, targetY = cr*CELL + CELL/2 - 6;
     [...svg.querySelectorAll('.carrot-wrap')].forEach(el=>{
       const m = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)\s*\)/.exec(el.getAttribute('transform') || '');
       if(m && Math.abs(+m[1] - targetX) < 1.5 && Math.abs(+m[2] - targetY) < 1.5){
@@ -750,7 +1023,7 @@ async function doCommand(cmd){
     await sleep(180);
   }
 
-  if(nr === home.r && nc === home.c){
+  if(bunny.r === home.r && bunny.c === home.c){
     if(collected === totalCarrots) return 'win';
     toast('先把萝卜吃完，门才开哦');
     return 'hint';
@@ -758,49 +1031,63 @@ async function doCommand(cmd){
   return 'ok';
 }
 
+/* 递归执行：重复组里的指令跑两遍 */
+async function execList(list, token){
+  for(const it of list){
+    if(token !== runToken) return 'abort';
+    highlight(it);
+    if(it.t === 'r'){
+      for(let k=0;k<2;k++){
+        const r = await execList(it.body, token);
+        if(r !== 'ok') return r;
+      }
+    }else{
+      const r = await doCommand(it.c);
+      if(r === 'win' || r === 'fail') return r;
+      if(r === 'hint') lastHint = true;
+    }
+  }
+  return 'ok';
+}
+let lastHint = false;
+
 async function run(){
-  if(running || program.length === 0) return;
+  if(running || countBlocks(program) === 0) return;
   ac();
   running = true;
   const token = ++runToken;
   updateButtons();
-  // 重置到起点
   setBoardReset();
   await sleep(200);
-  let result = 'ok';
-  for(let i=0;i<program.length;i++){
-    if(token !== runToken) return;
-    highlight(i);
-    result = await doCommand(program[i]);
-    if(result !== 'ok' && result !== 'hint') break;
-    if(result === 'hint' && i < program.length - 1) result = 'ok';
-  }
-  highlight(-1);
+  lastHint = false;
+  const result = await execList(program, token);
+  highlight(null);
   if(token !== runToken) return;
   running = false;
   updateButtons();
   if(result === 'win'){ win(); }
-  else if(result === 'ok'){
+  else if(result === 'ok' && !lastHint){
     toast('还没到家，再想想路线吧～');
     SFX.tap();
   }
 }
 
 function setBoardReset(){
-  collected = 0;
+  collected = 0; hasKey = false;
   bunny = {r:start.r, c:start.c, d:DIRNAME[level.dir]};
   $('#cntNum').textContent = 0;
   $('#cnt').classList.remove('all');
-  // 恢复萝卜与小屋
+  $('#keyChip').classList.remove('got');
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
-    if(LEVELS[lvIndex].map[r][c] === 'C') grid[r][c] = 'C';
+    const src = LEVELS[lvIndex].map[r][c];
+    if(src === 'C' || src === 'K') grid[r][c] = src;
   }
   buildBoard();
 }
 
 /* ============ 胜负 ============ */
 function calcStars(){
-  const used = program.length;
+  const used = countBlocks(program);
   if(used <= level.best + 1) return 3;
   if(used <= level.best + 3) return 2;
   return 1;
@@ -808,6 +1095,7 @@ function calcStars(){
 
 function win(){
   const st = calcStars();
+  const used = countBlocks(program);
   const prev = progress.stars[lvIndex] || 0;
   progress.stars[lvIndex] = Math.max(prev, st);
   progress.unlocked = Math.max(progress.unlocked, Math.min(lvIndex + 1, LEVELS.length - 1));
@@ -817,7 +1105,7 @@ function win(){
   $('#winTitle').textContent = lvIndex === LEVELS.length - 1 ? '通关啦！' : '太棒了！';
   $('#winSub').textContent = lvIndex === LEVELS.length - 1 ? '你带小兔子走完了全部关卡' : '小兔子吃到萝卜，回家啦';
   $('#stars').innerHTML = [0,1,2].map(i=>`<span class="${i<st?'on':''}">${STAR_SVG(i<st)}</span>`).join('');
-  $('#winUsed').textContent = `用了 ${program.length} 块积木 · 最少只要 ${level.best} 块哦`;
+  $('#winUsed').textContent = `用了 ${used} 块积木 · 最少只要 ${level.best} 块哦`;
   $('#nextBtn').style.display = lvIndex === LEVELS.length - 1 ? 'none' : '';
   $('#overlay').classList.add('show');
   confetti();
@@ -852,16 +1140,27 @@ function toast(msg){
 /* ============ 事件绑定 ============ */
 $('#runBtn').addEventListener('click', run);
 $('#undoBtn').addEventListener('click', ()=>{
-  if(running || !program.length) return;
-  program.pop(); SFX.del(); renderProgram(); updateButtons();
+  if(running) return;
+  // 撤销：删掉最后加入的那一块（优先删重复框里的最后一块）
+  let target = null;
+  const scan = list => {
+    for(const it of list){
+      if(it.t === 'r'){ if(it.body.length) target = it.body[it.body.length-1]; scan(it.body); }
+      else target = it;
+    }
+  };
+  scan(program);
+  if(!target) return;
+  removeItem(target);
+  SFX.del(); renderProgram(); updateButtons();
 });
 $('#clearBtn').addEventListener('click', ()=>{
   if(running) return;
-  program = []; SFX.del(); renderProgram(); updateButtons();
+  program = []; openRep = null; SFX.del(); renderProgram(); updateButtons();
 });
 $('#againBtn').addEventListener('click', ()=>{
   $('#overlay').classList.remove('show');
-  program = []; renderProgram(); updateButtons();
+  program = []; openRep = null; renderProgram(); updateButtons();
   setBoardReset();
   SFX.tap();
 });
