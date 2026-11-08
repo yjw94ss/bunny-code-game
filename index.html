@@ -57,10 +57,10 @@
   .brand{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:800;letter-spacing:.5px}
   .brand .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(160deg,#ffd66b,#ff9f43);display:grid;place-items:center;box-shadow:0 8px 18px rgba(255,159,67,.35)}
   .brand .logo svg{width:26px;height:26px}
-  .dots{display:flex;gap:7px;margin-left:auto;flex-wrap:wrap}
+  .dots{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
   .dot{
-    width:30px;height:30px;border-radius:11px;border:none;cursor:pointer;
-    background:#ffffff;color:#9db0c0;font-weight:800;font-size:13px;font-family:inherit;
+    width:25px;height:25px;border-radius:8px;border:none;cursor:pointer;
+    background:#ffffff;color:#9db0c0;font-weight:800;font-size:12px;font-family:inherit;
     box-shadow:0 3px 0 #d9e4ee; transition:transform .15s, box-shadow .15s, background .2s, color .2s;
   }
   .dot.done{background:#d8f5df;color:#2b9a3f;box-shadow:0 3px 0 #b6e8c3}
@@ -105,6 +105,20 @@
   @keyframes keyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   .key-wrap.taken{opacity:0;transition:opacity .35s}
   .key-wrap.taken .key{animation:none;transform:translateY(-24px) scale(.5);transition:transform .35s}
+
+  /* 冰面 / 弹簧 / 按钮 / 桥 */
+  .ice-shine{animation:iceShine 3.4s ease-in-out infinite}
+  @keyframes iceShine{0%,100%{opacity:.35}50%{opacity:.85}}
+  .spring-wrap .coil{animation:coilIdle 2.4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+  @keyframes coilIdle{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.84)}}
+  .spring-wrap.boing .coil{animation:boing .42s cubic-bezier(.3,1.7,.5,1)}
+  @keyframes boing{0%{transform:scaleY(.55)}40%{transform:scaleY(1.3)}100%{transform:scaleY(1)}}
+  .pad-inner{transform-box:fill-box;transform-origin:50% 100%}
+  .pad-inner.pop{animation:padPop .42s cubic-bezier(.2,1.6,.4,1) both}
+  @keyframes padPop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+  .bridge-inner{transform-box:fill-box;transform-origin:50% 50%}
+  .bridge-inner.pop{animation:bridgePop .5s cubic-bezier(.2,1.6,.4,1) both}
+  @keyframes bridgePop{from{transform:scale(.35);opacity:0}to{transform:scale(1);opacity:1}}
   .stage-foot{display:flex;align-items:center;gap:12px;padding:2px 4px 0}
   .cnt{display:inline-flex;align-items:center;gap:6px;background:#fff4e2;border-radius:12px;padding:6px 12px;font-weight:800;font-size:14px;color:#a9601a}
   .cnt svg{width:17px;height:17px}
@@ -132,7 +146,7 @@
   .sec .right{margin-left:auto;font-weight:700;color:#9fb0bd;font-size:13px}
 
   .program{
-    flex:1 1 auto;min-height:150px;max-height:340px;overflow:auto;border-radius:20px;
+    flex:1 1 auto;min-height:150px;max-height:56vh;overflow:auto;border-radius:20px;
     background:linear-gradient(180deg,#f7fbff,#eef6fd);
     border:3px dashed #cfe4f5;
     padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;
@@ -316,6 +330,10 @@
           <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="4.2" stroke="#c99100" stroke-width="2.4"/><path d="M11 11l7 7M15 15l2-2M18 18l2-2" stroke="#c99100" stroke-width="2.4" stroke-linecap="round"/></svg>
           <span id="keyTxt">钥匙</span>
         </div>
+        <div class="cnt key" id="bridgeChip" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M2 8h20" stroke="#c99100" stroke-width="2.4" stroke-linecap="round"/><path d="M2 16h20" stroke="#c99100" stroke-width="2.4" stroke-linecap="round"/><path d="M6 8v8M12 8v8M18 8v8" stroke="#c99100" stroke-width="2.4" stroke-linecap="round"/></svg>
+          <span id="bridgeTxt">桥</span>
+        </div>
         <div class="cnt" id="blockCnt" style="background:#eef6ff;color:#3d7ec0">
           <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2.6" fill="#3b82f6"/><rect x="13" y="3" width="8" height="8" rx="2.6" fill="#8b5cf6"/><rect x="3" y="13" width="8" height="8" rx="2.6" fill="#f59e0b"/><rect x="13" y="13" width="8" height="8" rx="2.6" fill="#37b24d"/></svg>
           <b id="blkNum">0</b><span>/</span><span id="blkAll">10</span>
@@ -389,6 +407,9 @@ const SFX = {
   bump(){ tone(160,.16,'sawtooth',.09,0,90); },
   unlock(){ tone(700,.09,'square',.07); tone(1050,.1,'square',.06,.08); tone(1500,.16,'sine',.09,.16); },
   portal(){ tone(300,.3,'sine',.08,0,1100); tone(1200,.24,'triangle',.06,.06,320); },
+  slide(){ tone(900,.26,'sine',.07,0,1500); tone(1400,.2,'triangle',.04,.1,700); },
+  spring(){ tone(280,.1,'square',.08,0,900); tone(900,.16,'sine',.09,.1,1500); },
+  bridge(){ [392,523,659,784].forEach((f,i)=>tone(f,.14,'triangle',.09,i*.07)); },
   fail(){ tone(300,.14,'sawtooth',.07,0,200); tone(200,.2,'sawtooth',.06,.12,120); },
   win(){ [523,659,784,1046].forEach((f,i)=>tone(f,.18,'sine',.11,i*.11)); [523,784].forEach((f,i)=>tone(f,.5,'triangle',.05,.46+i*.02)); },
   tap(){ tone(760,.05,'square',.05); }
@@ -410,32 +431,59 @@ const LEVELS = [
     map:['......','.###..','..C...','S.C.H.'] },
   { name:'学会跳跳', tip:'紫色按钮可以一次跳两格！', dir:'right', best:2, jump:true,
     map:['.....','S#C.H','.....'] },
-  { name:'水塘挡路', tip:'水塘不能走，跳过去！', dir:'right', best:3, jump:true,
+  { name:'水塘挡路', tip:'水塘不能走，要跳过去', dir:'right', best:3, jump:true,
     map:['######','S.~C~H','######'] },
+
+  { name:'冰面滑行', tip:'冰面很滑，走上去会一直滑到底', dir:'right', best:3, jump:true,
+    map:['##########','S.C*****.H','##########'] },
+  { name:'冰面拐弯', tip:'滑到萝卜那里会停下来，再转弯', dir:'right', best:4, jump:true,
+    map:['########','S*****C#','######.#','######C#','######H#'] },
+
   { name:'跳过石头', tip:'跳过石头，别漏掉萝卜', dir:'right', best:8, jump:true,
     map:['......','S..#.H','...#..','....C.'] },
   { name:'水塘迷宫', tip:'水很宽，走不过去，只能跳', dir:'right', best:8, jump:true,
     map:['.#~...','S.~...','..~.C.','.#~...','..~..H'] },
+
+  { name:'弹簧板', tip:'弹簧板会把你往前弹两格，不用积木', dir:'right', best:4, jump:true,
+    map:['#######','S.^..C#','#####H#'] },
+  { name:'弹簧接力', tip:'一块接一块地弹，飞过水塘', dir:'right', best:3, jump:true,
+    map:['##########','S.^~^..C.H','##########'] },
+
   { name:'钥匙与门', tip:'先捡钥匙，门才会打开', dir:'right', best:10, jump:true,
     map:['..####','S..D.H','.K####','.C####'] },
   { name:'钥匙在水那边', tip:'钥匙在水塘后面，门在另一头', dir:'right', best:4, jump:true,
     map:['#######','S.~KD.H','#######'] },
+
   { name:'传送门', tip:'踩上紫色圈圈，会从另一个圈圈出来', dir:'right', best:4, jump:true,
     map:['S..1..','######','######','#2CH.#'] },
   { name:'传送门迷宫', tip:'小房间没有门，只能靠传送门', dir:'right', best:10, jump:true,
     map:['S.....#','..1...#','#######','#######','#C...2#','#..H..#'] },
+
   { name:'小迷宫', tip:'迷路了就慢慢来，别着急', dir:'right', best:8, jump:true,
     map:['......','S.#...','..#.#.','C...C.','....#H'] },
+
+  { name:'按下按钮', tip:'踩一下红按钮，桥才会出现', dir:'right', best:5, jump:true,
+    map:['#########','SB..=.C.H','#########'] },
+  { name:'去按按钮', tip:'按钮在下面，先绕下去按一下', dir:'right', best:11, jump:true,
+    map:['#########','S.~..=..H','###.#####','###B#####'] },
+
   { name:'绕来绕去', tip:'先想好顺序，再一块一块加', dir:'right', best:10, jump:true,
     map:['......','S.#..H','..#...','C.#...','....C.'] },
+  { name:'冰面弹簧', tip:'先滑冰，再被弹一下，正好到萝卜', dir:'right', best:5, jump:true,
+    map:['##########','S*.*^~..C#','########H#'] },
+
   { name:'三颗萝卜', tip:'三颗全吃掉，一颗都不能少', dir:'up', best:15, jump:true,
     map:['..#..C','.C#...','..#.#.','S...#H','.C....'] },
+
   { name:'重复积木', tip:'把积木放进紫色框里，它就会做两遍', dir:'right', best:5, repeat:true, max:6,
     map:['.........','S..C..C.H','.........'] },
   { name:'重复转弯', tip:'走到底转个弯，再用重复走一遍', dir:'right', best:7, repeat:true, max:9,
     map:['S..C..','......','......','.....C','......','.....H'] },
+
   { name:'终极挑战', tip:'最后一关，你一定可以！', dir:'right', best:17, jump:true,
-    map:['S.C.#..','.##.#..','....#.C','.#.....','.#.##..','C....#H'] }
+    map:['S.C.#..','.##.#..','....#.C','.#.....','.#.##..','C....#H'] },
+  { name:'大师关', tip:'冰、弹簧、桥都用上，最后的大关', dir:'right', best:17, jump:true,
+    map:['##########','#S*.*.C..#','#.#.#.#..#','#.^~.^~..#','#.#.#.#..#','#C..~.C..#','#.#.#.#..#','#..^~..H.#','##########'] }
 ];
 
 /* ============ 状态 ============ */
@@ -446,18 +494,42 @@ let lvIndex = 0, level = null, grid = [], rows = 0, cols = 0;
 let start = {r:0,c:0}, home = {r:0,c:0}, totalCarrots = 0, collected = 0;
 let bunny = {r:0,c:0,d:1};
 let hasKey = false, portals = {}, portalEls = {}, doorEl = null, keyEl = null;
+let bridgesOpen = false;
 let program = [];        // {t:'c', c:'M'} 或 {t:'r', body:[...]}
 let openRep = null;      // 正在编辑的重复框
+let taught = new Set();  // 本关已经解释过的机制
 let running = false, runToken = 0;
 let bunnyPos = null, bunnyRot = null;
-let progress = { unlocked:0, stars:{} };
+let progress = { unlocked:0, stars:{} };   // stars 用关卡名做键，加减关卡不会错位
 
-const KEY = 'bunny-code-progress-v1';
+const KEY = 'bunny-code-progress-v2';
+const OLD_KEY = 'bunny-code-progress-v1';
+const OLD_NAMES = ['一直往前走','学会转弯','石头挡路','两颗萝卜','学会跳跳','水塘挡路','跳过石头','水塘迷宫',
+  '钥匙与门','钥匙在水那边','传送门','传送门迷宫','小迷宫','绕来绕去','三颗萝卜','重复积木','重复转弯','终极挑战'];
+
 function loadProgress(){
-  try{
-    const raw = localStorage.getItem(KEY);
-    if(raw) progress = Object.assign({unlocked:0,stars:{}}, JSON.parse(raw));
-  }catch(e){}
+  let raw = null;
+  try{ raw = localStorage.getItem(KEY); }catch(e){}
+  if(raw){
+    try{ progress = Object.assign({unlocked:0,stars:{}}, JSON.parse(raw)); }catch(e){}
+  }else{
+    // 从旧版（18 关、按下标存星星）迁移过来
+    let old = null;
+    try{ old = JSON.parse(localStorage.getItem(OLD_KEY) || 'null'); }catch(e){}
+    if(old && old.stars){
+      const stars = {};
+      let unlocked = 0;
+      for(const k in old.stars){
+        const name = OLD_NAMES[+k];
+        const ni = LEVELS.findIndex(l => l.name === name);
+        if(ni < 0) continue;
+        stars[name] = old.stars[k];
+        unlocked = Math.max(unlocked, ni + 1);
+      }
+      progress = { unlocked, stars };
+      saveProgress();
+    }
+  }
   try{ muted = localStorage.getItem(KEY+'-mute') === '1'; }catch(e){}
 }
 function saveProgress(){
@@ -595,6 +667,94 @@ function portalSVG(){
   </g>`;
 }
 
+/* 冰面：一整块亮蓝色的冰，带裂纹和反光 */
+function iceSVG(){
+  return `<g class="ice">
+    <rect x="-46" y="-46" width="92" height="92" rx="18" fill="#8fd4f5"/>
+    <rect x="-46" y="-46" width="92" height="92" rx="18" fill="url(#iceGrad)"/>
+    <rect x="-46" y="-46" width="92" height="92" rx="18" fill="none" stroke="#cdeeff" stroke-width="4"/>
+    <path d="M-30 -22 L-16 -8 L-28 6" stroke="#5aa9d6" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M4 -32 L15 -15 L2 -3" stroke="#5aa9d6" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-28 26 L-14 19 L-3 30" stroke="#5aa9d6" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M22 8 L31 16" stroke="#5aa9d6" stroke-width="3" stroke-linecap="round"/>
+    <g class="ice-shine"><path d="M-42 -26 L-6 -44 L-20 -12 Z" fill="#fff" opacity=".9"/></g>
+  </g>`;
+}
+
+/* 弹簧板：折线弹簧 + 橙色踏板 */
+function springSVG(){
+  return `<g class="spring">
+    <ellipse cx="0" cy="33" rx="26" ry="7.5" fill="#2a5d33" opacity=".22"/>
+    <g class="coil">
+      <path d="M-19 30 L19 24 L-19 17 L19 10 L-17 3" stroke="#7b8fa1" stroke-width="6"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M-19 30 L19 24 L-19 17 L19 10 L-17 3" stroke="#a8bac9" stroke-width="2.4"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="-31" y="-16" width="62" height="20" rx="10" fill="#e06c26"/>
+      <rect x="-31" y="-18" width="62" height="20" rx="10" fill="#ff9448"/>
+      <rect x="-31" y="-18" width="62" height="20" rx="10" fill="url(#plateShine)"/>
+      <rect x="-22" y="-14" width="44" height="5" rx="2.5" fill="#ffd9c2" opacity=".95"/>
+    </g>
+    <g opacity=".85" stroke="#ffb066" stroke-width="3.4" fill="none" stroke-linecap="round">
+      <path d="M-36 -8 q-4 -7 0 -13"/>
+      <path d="M36 -8 q4 -7 0 -13"/>
+    </g>
+  </g>`;
+}
+
+/* 按钮：没按下是红蘑菇头，按下变绿并打勾 */
+function buttonSVG(on){
+  return `<g class="pad">
+    <ellipse cx="0" cy="31" rx="29" ry="9" fill="#2a5d33" opacity=".2"/>
+    <rect x="-31" y="13" width="62" height="17" rx="8" fill="#a9b8c6"/>
+    <rect x="-31" y="13" width="62" height="17" rx="8" fill="url(#plateShine)"/>
+    <ellipse cx="0" cy="13" rx="27" ry="9" fill="#8fa0af"/>
+    ${on ? `
+      <ellipse cx="0" cy="9" rx="22" ry="7" fill="#3fbf5e"/>
+      <ellipse cx="0" cy="9" rx="22" ry="7" fill="url(#plateShine)"/>
+      <path d="M-8 4 l6 8 12-14" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    ` : `
+      <ellipse cx="0" cy="1" rx="22" ry="11" fill="#ff6b6b"/>
+      <ellipse cx="0" cy="1" rx="22" ry="11" fill="url(#plateShine)"/>
+      <ellipse cx="-8" cy="-2" rx="7" ry="3.2" fill="#fff" opacity=".6"/>
+    `}
+  </g>`;
+}
+
+/* 桥：没按按钮时是断桥（深坑），按下后长出木板桥 */
+function bridgeSVG(open){
+  if(open){
+    let planks = '';
+    for(let i=0;i<6;i++){
+      const y = -34 + i*12;
+      planks += `<rect x="-40" y="${y}" width="80" height="10" rx="3" fill="${i%2?'#d9a967':'#c99654'}"/>`;
+    }
+    return `<g class="bridge">
+      <rect x="-46" y="-46" width="92" height="92" rx="18" fill="#7fc44a"/>
+      <rect x="-42" y="-40" width="84" height="80" rx="6" fill="#8a6039"/>
+      ${planks}
+      <g fill="#a8703f">
+        <rect x="-46" y="-42" width="7" height="84" rx="3"/>
+        <rect x="39" y="-42" width="7" height="84" rx="3"/>
+      </g>
+      <g fill="#c98f52">
+        <rect x="-44" y="-36" width="4" height="72" rx="2" opacity=".8"/>
+        <rect x="40" y="-36" width="4" height="72" rx="2" opacity=".8"/>
+      </g>
+      <rect x="-42" y="-40" width="84" height="80" rx="6" fill="url(#plateShine)"/>
+    </g>`;
+  }
+  return `<g class="bridge">
+    <rect x="-46" y="-46" width="92" height="92" rx="18" fill="#7fc44a"/>
+    <rect x="-40" y="-40" width="80" height="80" rx="14" fill="#41586b"/>
+    <rect x="-40" y="-40" width="80" height="80" rx="14" fill="url(#gapShade)"/>
+    <rect x="-40" y="-28" width="11" height="56" rx="4" fill="#8a6039"/>
+    <rect x="29" y="-28" width="11" height="56" rx="4" fill="#8a6039"/>
+    <rect x="-40" y="-28" width="11" height="56" rx="4" fill="url(#plateShine)"/>
+    <path d="M-7 -7 L7 7 M7 -7 L-7 7" stroke="#cfdde8" stroke-width="4.5" opacity=".55" stroke-linecap="round"/>
+  </g>`;
+}
+
 function buildBoard(){
   const W = cols * CELL, H = rows * CELL;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -634,6 +794,10 @@ function buildBoard(){
         s += `<g transform="translate(${cx},${cy}) rotate(${rot}) scale(${sc})">${rockSVG()}</g>`;
       }
       else if(ch === '~') s += `<g transform="translate(${cx},${cy})">${waterSVG()}</g>`;
+      else if(ch === '*') s += `<g transform="translate(${cx},${cy})">${iceSVG()}</g>`;
+      else if(ch === '^') s += `<g class="spring-wrap" data-cell="${r},${c}" transform="translate(${cx},${cy + 2})">${springSVG()}</g>`;
+      else if(ch === 'B') s += `<g class="pad-wrap" data-cell="${r},${c}" transform="translate(${cx},${cy + 2})">${buttonSVG(bridgesOpen)}</g>`;
+      else if(ch === '=') s += `<g class="bridge-wrap" data-cell="${r},${c}" transform="translate(${cx},${cy})">${bridgeSVG(bridgesOpen)}</g>`;
       else if(ch === 'H') s += `<g class="house-wrap" transform="translate(${cx},${cy - 4})">${houseSVG(collected === totalCarrots)}</g>`;
       else if(ch === 'C') s += `<g class="carrot-wrap" transform="translate(${cx},${cy - 6})">${carrotSVG()}</g>`;
       else if(ch === 'K') s += `<g class="key-wrap" transform="translate(${cx},${cy - 4})">${keySVG()}</g>`;
@@ -654,6 +818,19 @@ function buildBoard(){
       </linearGradient>
       <radialGradient id="openGlow"><stop offset="0" stop-color="#7ce8a4" stop-opacity=".55"/><stop offset="1" stop-color="#7ce8a4" stop-opacity="0"/></radialGradient>
       <radialGradient id="portalGlow"><stop offset="0" stop-color="#ffffff" stop-opacity=".9"/><stop offset=".65" stop-color="#c9b6ff" stop-opacity=".55"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
+      <linearGradient id="iceGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".7"/>
+        <stop offset=".45" stop-color="#d8f2ff" stop-opacity=".15"/>
+        <stop offset="1" stop-color="#5fb8e0" stop-opacity=".55"/>
+      </linearGradient>
+      <linearGradient id="plateShine" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".55"/>
+        <stop offset=".6" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="gapShade" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#1b2b38" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#1b2b38" stop-opacity=".1"/>
+      </linearGradient>
       <clipPath id="waterClip"><rect x="-46" y="-46" width="92" height="92" rx="18"/></clipPath>
     </defs>`;
   svg.innerHTML = defs + s;
@@ -700,13 +877,18 @@ function walkable(r,c){
   const ch = grid[r][c];
   if(ch === '#' || ch === '~') return false;          // 石头、水塘都走不进去
   if(ch === 'D' && !hasKey) return false;             // 没钥匙，门锁着
+  if(ch === '=' && !bridgesOpen) return false;        // 没按按钮，桥还没出现
   return true;
 }
 function jumpPath(r,c,d){
-  // 跳两格：中间那格可以是石头/水，但关着的门跳不过去
+  // 跳两格：中间那格可以是石头/水，但关着的门、还没出现的桥跳不过去
   const [dr,dc] = DIRS[d];
   const mr = r + dr, mc = c + dc;
-  if(mr >= 0 && mc >= 0 && mr < rows && mc < cols && grid[mr][mc] === 'D' && !hasKey) return false;
+  if(mr >= 0 && mc >= 0 && mr < rows && mc < cols){
+    const mid = grid[mr][mc];
+    if(mid === 'D' && !hasKey) return false;
+    if(mid === '=' && !bridgesOpen) return false;
+  }
   return walkable(r + dr*2, c + dc*2);
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -725,19 +907,21 @@ function setLevel(i){
   if(!level.max) level.max = Math.max(level.best + 6, 8);
   grid = raw.map.map(row => row.split(''));
   rows = grid.length; cols = grid[0].length;
-  totalCarrots = 0; collected = 0; hasKey = false; portals = {};
-  let hasKeyTile = false;
+  totalCarrots = 0; collected = 0; hasKey = false; portals = {}; bridgesOpen = false;
+  let hasKeyTile = false, hasBridgeTile = false;
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
     const ch = grid[r][c];
     if(ch === 'C') totalCarrots++;
     if(ch === 'S') start = {r,c};
     if(ch === 'H') home = {r,c};
     if(ch === 'K') hasKeyTile = true;
+    if(ch === '=' || ch === 'B') hasBridgeTile = true;
     if(ch === '1' || ch === '2') portals[ch] = {r,c};
   }
   level.hasKeyTile = hasKeyTile;
   bunny = {r:start.r, c:start.c, d:DIRNAME[raw.dir]};
   program = []; openRep = null;
+  taught = new Set();
   running = false; runToken++;
   $('#lvBadge').textContent = `第 ${lvIndex+1} 关`;
   $('#lvTip').textContent = raw.tip;
@@ -748,6 +932,8 @@ function setLevel(i){
   $('#blkNum').textContent = 0;
   $('#keyChip').style.display = hasKeyTile ? '' : 'none';
   $('#keyChip').classList.remove('got');
+  $('#bridgeChip').style.display = hasBridgeTile ? '' : 'none';
+  $('#bridgeChip').classList.remove('got');
   renderDots();
   buildBoard();
   renderProgram();
@@ -960,10 +1146,13 @@ async function doCommand(cmd){
   if(!ok){
     bumpAnim(); SFX.bump();
     await sleep(200); SFX.fail();
-    const [tr,tc] = [bunny.r + dr, bunny.c + dc];
-    const ahead = (tr>=0&&tc>=0&&tr<rows&&tc<cols) ? grid[tr][tc] : '#';
-    if(ahead === '~') toast('小兔子不会游泳，要跳过去！');
-    else if(ahead === 'D' && !hasKey) toast('门锁着呢，先去找钥匙');
+    const at = (r,c) => (r>=0 && c>=0 && r<rows && c<cols) ? grid[r][c] : '#';
+    const ahead = at(bunny.r + dr, bunny.c + dc);
+    const land = at(bunny.r + dr*steps, bunny.c + dc*steps);
+    const hit = [ahead, land];
+    if(hit.includes('~')) toast('小兔子不会游泳，要跳过去！');
+    else if(hit.includes('D') && !hasKey) toast('门锁着呢，先去找钥匙');
+    else if(hit.includes('=') && !bridgesOpen) toast('桥还没出现，先去踩按钮');
     else toast(steps === 2 ? '前面跳不过去哦～' : '前面过不去啦！');
     return 'fail';
   }
@@ -971,32 +1160,45 @@ async function doCommand(cmd){
   bunny.r = nr; bunny.c = nc;
   placeBunny(true, cmd === 'J' ? 450 : 330);
   await sleep(cmd === 'J' ? 470 : 340);
+  return await landOn();
+}
 
-  // 捡钥匙
-  if(grid[nr][nc] === 'K'){
-    grid[nr][nc] = '.';
-    hasKey = true;
-    SFX.unlock();
-    const kw = svg.querySelector('.key-wrap');
-    if(kw){ kw.classList.add('taken'); setTimeout(()=> kw.remove(), 380); }
-    const dw = svg.querySelector('.door-wrap');
-    if(dw) dw.innerHTML = doorSVG(true);
-    $('#keyChip').classList.add('got');
-    await sleep(220);
-  }
-
-  // 传送门
-  if(grid[nr][nc] === '1' || grid[nr][nc] === '2'){
-    const other = grid[nr][nc] === '1' ? '2' : '1';
-    const p = portals[other];
-    SFX.portal();
-    await sleep(200);
-    const pw = svg.querySelectorAll('.portal-wrap');
-    pw.forEach(el=> el.classList.add('flash'));
-    bunny.r = p.r; bunny.c = p.c;
-    placeBunny(false);
-    await sleep(260);
-    pw.forEach(el=> el.classList.remove('flash'));
+/* 落地结算：钥匙 / 按钮 / 传送门 / 弹簧 / 冰面，最后吃萝卜、看有没有到家 */
+async function landOn(){
+  let guard = 0;
+  while(guard++ < 24){
+    const ch = grid[bunny.r][bunny.c];
+    if(ch === 'K'){
+      grid[bunny.r][bunny.c] = '.';
+      hasKey = true;
+      SFX.unlock();
+      const kw = svg.querySelector('.key-wrap');
+      if(kw){ kw.classList.add('taken'); setTimeout(()=> kw.remove(), 380); }
+      const dw = svg.querySelector('.door-wrap');
+      if(dw) dw.innerHTML = doorSVG(true);
+      $('#keyChip').classList.add('got');
+      await sleep(230);
+      continue;
+    }
+    if(ch === 'B'){
+      if(!bridgesOpen) await pressButton();
+      break;
+    }
+    if(ch === '1' || ch === '2'){
+      await teleport(ch);
+      break;
+    }
+    if(ch === '^'){
+      const ok = await bounce();
+      if(!ok) return 'fail';
+      continue;
+    }
+    if(ch === '*'){
+      const moved = await slide();
+      if(!moved) break;
+      continue;
+    }
+    break;
   }
 
   // 吃萝卜
@@ -1029,6 +1231,100 @@ async function doCommand(cmd){
     return 'hint';
   }
   return 'ok';
+}
+
+async function teleport(ch){
+  const other = ch === '1' ? '2' : '1';
+  const p = portals[other];
+  SFX.portal();
+  await sleep(200);
+  const pw = svg.querySelectorAll('.portal-wrap');
+  pw.forEach(el=> el.classList.add('flash'));
+  bunny.r = p.r; bunny.c = p.c;
+  placeBunny(false);
+  await sleep(260);
+  pw.forEach(el=> el.classList.remove('flash'));
+}
+
+/* 冰面：一路滑到不是冰面的格子（或者撞上东西） */
+async function slide(){
+  const [dr,dc] = DIRS[bunny.d];
+  const path = [];
+  let r = bunny.r, c = bunny.c;
+  while(true){
+    const nr = r + dr, nc = c + dc;
+    if(!walkable(nr, nc)) break;
+    path.push([nr, nc]);
+    r = nr; c = nc;
+    if(grid[nr][nc] !== '*') break;
+  }
+  if(!path.length) return false;
+  SFX.slide();
+  explain('ice', '冰面好滑，一路滑到底才停～');
+  for(const [nr,nc] of path){
+    bunny.r = nr; bunny.c = nc;
+    placeBunny(true, 105);
+    await sleep(118);
+  }
+  return true;
+}
+
+/* 弹簧板：踩上自动往前弹两格 */
+async function bounce(){
+  const sw = svg.querySelector(`.spring-wrap[data-cell="${bunny.r},${bunny.c}"]`);
+  if(sw){
+    sw.classList.add('boing');
+    setTimeout(()=> sw.classList.remove('boing'), 470);
+  }
+  const [dr,dc] = DIRS[bunny.d];
+  if(!jumpPath(bunny.r, bunny.c, bunny.d)){
+    SFX.bump();
+    await hopInPlace();
+    SFX.fail();
+    toast('弹簧前面挡住了，弹不过去');
+    return false;
+  }
+  SFX.spring();
+  explain('spring', '弹簧把你弹过去两格，不用积木！');
+  bunny.r = bunny.r + dr*2; bunny.c = bunny.c + dc*2;
+  placeBunny(true, 470);
+  await sleep(490);
+  return true;
+}
+
+function explain(key, msg){
+  if(taught.has(key)) return;
+  taught.add(key);
+  toast(msg);
+}
+
+function hopInPlace(){
+  if(!bunnyPos) return sleep(240);
+  const x = bunny.c*CELL + CELL/2, y = bunny.r*CELL + CELL/2;
+  bunnyPos.style.transition = 'transform .18s ease-out';
+  bunnyPos.style.transform = `translate(${x}px, ${y - 16}px)`;
+  return sleep(180).then(()=>{
+    bunnyPos.style.transition = 'transform .2s ease-in';
+    bunnyPos.style.transform = `translate(${x}px, ${y}px)`;
+    return sleep(210);
+  }).then(()=>{ bunnyPos.style.transition = ''; });
+}
+
+/* 按钮：桥出现 */
+async function pressButton(){
+  bridgesOpen = true;
+  SFX.bridge();
+  const pad = svg.querySelector('.pad-wrap');
+  if(pad) pad.innerHTML = `<g class="pad-inner pop">${buttonSVG(true)}</g>`;
+  [...svg.querySelectorAll('.bridge-wrap')].forEach((el, i)=>{
+    el.innerHTML = `<g class="bridge-inner">${bridgeSVG(true)}</g>`;
+    const inner = el.querySelector('.bridge-inner');
+    inner.style.animationDelay = (i * 90) + 'ms';
+    inner.classList.add('pop');
+  });
+  $('#bridgeChip').classList.add('got');
+  toast('桥出现啦，可以过去了！');
+  await sleep(420);
 }
 
 /* 递归执行：重复组里的指令跑两遍 */
@@ -1073,11 +1369,12 @@ async function run(){
 }
 
 function setBoardReset(){
-  collected = 0; hasKey = false;
+  collected = 0; hasKey = false; bridgesOpen = false;
   bunny = {r:start.r, c:start.c, d:DIRNAME[level.dir]};
   $('#cntNum').textContent = 0;
   $('#cnt').classList.remove('all');
   $('#keyChip').classList.remove('got');
+  $('#bridgeChip').classList.remove('got');
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
     const src = LEVELS[lvIndex].map[r][c];
     if(src === 'C' || src === 'K') grid[r][c] = src;
@@ -1096,8 +1393,8 @@ function calcStars(){
 function win(){
   const st = calcStars();
   const used = countBlocks(program);
-  const prev = progress.stars[lvIndex] || 0;
-  progress.stars[lvIndex] = Math.max(prev, st);
+  const prev = progress.stars[level.name] || 0;
+  progress.stars[level.name] = Math.max(prev, st);
   progress.unlocked = Math.max(progress.unlocked, Math.min(lvIndex + 1, LEVELS.length - 1));
   saveProgress();
   renderDots();
